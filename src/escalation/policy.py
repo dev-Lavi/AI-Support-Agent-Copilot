@@ -83,19 +83,36 @@ class EscalationPolicy:
                 is_sensitive_intent=True
             )
 
-        # 2. Sensitive / Policy-restricted intent check
-        if predicted_intent in self.sensitive_intents:
+        # 2. Sensitive / Policy-restricted intent check (feedback_complaint)
+        if predicted_intent == "feedback_complaint":
             return EscalationDecision(
                 action="ESCALATE",
-                reason_code="SENSITIVE_CASE",
-                details=f"Intent '{predicted_intent}' involves security, legal, or high-touch human handling.",
+                reason_code="HIGH_RISK_GRIEVANCE",
+                details="Customer grievance/feedback requires specialized human relationship handling.",
                 intent_confidence=intent_confidence,
                 retrieval_similarity=retrieval_similarity,
                 is_sensitive_intent=True
             )
 
         # 3. Domain-specific escalation rules
-        # A. Data Loss Protection
+        # A. Account Security & Credential Lockouts (Mandatory Escalation)
+        auth_security_keywords = [
+            "locked out", "forgot password", "reset password", "forgot my password",
+            "disabled", "account disabled", "suspicious email", "phishing", "forgot passcode",
+            "security questions", "unlock my phone", "activation lock", "verification code",
+            "unauthorized", "stolen", "hacked", "identity", "is this real", "is it real", "is this legit"
+        ]
+        if predicted_intent == "account_access_auth" and any(kw in query_lower for kw in auth_security_keywords):
+            return EscalationDecision(
+                action="ESCALATE",
+                reason_code="ACCOUNT_SECURITY_2FA",
+                details="Apple ID security, 2FA lockout, or password recovery requires verified human handling.",
+                intent_confidence=intent_confidence,
+                retrieval_similarity=retrieval_similarity,
+                is_sensitive_intent=True
+            )
+
+        # B. Data Loss Protection
         data_loss_keywords = ["wiped all my", "lost all my", "lost my", "deleted my", "wiped my", "annotations lost", "photos lost", "notes lost", "recordings lost"]
         if any(kw in query_lower for kw in data_loss_keywords):
             return EscalationDecision(

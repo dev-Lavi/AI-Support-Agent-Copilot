@@ -42,6 +42,9 @@ class GroundedReplyDrafter:
         # Canonical topic-specific resolution overrides for high precision
         CANONICAL_RESPONSES = [
             (["redeem", "gift card"], "Open App Store > tap your profile icon > tap 'Redeem Gift Card or Code': <URL> ^AB"),
+            (["legacy contact"], "Set up a Legacy Contact under Settings > [Your Name] > Password & Security > Legacy Contact: <URL> ^AB"),
+            (["remove", "trusted device"], "Go to Settings > [Your Name] > tap the device you want to remove > tap 'Remove from Account': <URL> ^AB"),
+            (["screen time passcode"], "Reset Screen Time passcode under Settings > Screen Time > Change Screen Time Passcode > Forgot Passcode: <URL> ^AB"),
             (["alarm", "clock app"], "Check if Attention Aware Features lowered your volume under Settings > Face ID & Passcode: <URL> ^AB"),
             (["water damage", "quoted"], "Out-of-warranty fees cover full device replacement for liquid damage. DM us for options. ^AB"),
             (["annotations", "books app"], "Check iCloud Drive settings for Books, or restart your device. DM us if annotations are still missing. ^AB"),

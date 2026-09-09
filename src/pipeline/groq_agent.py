@@ -113,14 +113,14 @@ class GroqSupportAgent:
             "response_format": {"type": "json_object"}
         }
 
-        candidate_models = [self.model, "llama-3.3-70b-versatile", "llama-3.1-8b-instant", "gemma2-9b-it"]
+        candidate_models = [self.model, "llama-3.3-70b-versatile", "llama-3.1-8b-instant", "qwen-2.5-32b"]
         # Query active models dynamically if possible
         try:
             with httpx.Client(timeout=4.0) as client:
                 m_resp = client.get("https://api.groq.com/openai/v1/models", headers={"Authorization": f"Bearer {self.api_key.strip()}"})
                 if m_resp.status_code == 200:
                     avail_ids = [m.get("id") for m in m_resp.json().get("data", []) if m.get("id")]
-                    pref = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "gemma2-9b-it"]
+                    pref = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "qwen-2.5-32b"]
                     active = [m for m in pref if m in avail_ids]
                     if active:
                         candidate_models = active
