@@ -9,7 +9,8 @@ from src.intents.taxonomy import SENSITIVE_INTENTS
 # High-risk keywords indicating legal action, physical safety hazard, or financial fraud
 URGENT_KEYWORDS = [
     "lawsuit", "lawyer", "attorney", "sue", "scam", "fraud", "stolen", "stole",
-    "swelling", "melted", "burned", "smoke", "sparks", "fire",
+    "swelling", "melted", "burned", "smoke", "sparks", "fire", "frayed", "exposed wire",
+    "burnt plastic", "smells like burnt",
     "unauthorized", "unauthorized charge", "refund", "dispute", "hacked", "police", "court"
 ]
 
@@ -42,8 +43,8 @@ class EscalationPolicy:
 
     def __init__(
         self,
-        tau_intent: float = 0.28,
-        tau_retrieval: float = 0.20,
+        tau_intent: float = 0.22,
+        tau_retrieval: float = 0.12,
         sensitive_intents: Optional[List[str]] = None
     ):
         self.tau_intent = tau_intent
@@ -62,10 +63,10 @@ class EscalationPolicy:
 
         Priority order:
         1. Unknown intent
-        2. Sensitive intent category
-        3. High-risk keywords
-        4. Low intent classifier confidence
-        5. Insufficient historical retrieval evidence
+        2. Sensitive intent category (account_access_auth, feedback_complaint, etc.)
+        3. Domain-specific safety / data loss / price dispute / system crash triggers
+        4. Urgent high-risk keywords
+        5. Intent confidence & retrieval similarity thresholds
         6. Guardrail validation
         7. Auto-handle
         """
@@ -93,7 +94,44 @@ class EscalationPolicy:
                 is_sensitive_intent=True
             )
 
-        # 3. Urgent / High-Risk keyword scan
+        # 3. Domain-specific escalation rules
+        # A. Data Loss Protection
+        data_loss_keywords = ["wiped all my", "lost all my", "lost my", "deleted my", "wiped my", "annotations lost", "photos lost", "notes lost", "recordings lost"]
+        if any(kw in query_lower for kw in data_loss_keywords):
+            return EscalationDecision(
+                action="ESCALATE",
+                reason_code="SENSITIVE_DATA_LOSS",
+                details="Query involves customer data loss or sync missing files.",
+                intent_confidence=intent_confidence,
+                retrieval_similarity=retrieval_similarity,
+                is_sensitive_intent=True
+            )
+
+        # B. Repair Quote / Price Dispute
+        repair_dispute_keywords = ["robbery", "rip off", "ripoff", "overpriced", "quoted me", "repair quote", "refused service", "refused to service"]
+        if predicted_intent == "repair_service_warranty" and any(kw in query_lower for kw in repair_dispute_keywords):
+            return EscalationDecision(
+                action="ESCALATE",
+                reason_code="REPAIR_PRICE_DISPUTE",
+                details="Customer is disputing repair quote pricing or service provider refusal.",
+                intent_confidence=intent_confidence,
+                retrieval_similarity=retrieval_similarity,
+                is_sensitive_intent=True
+            )
+
+        # C. Critical System Failure / Kernel Panic
+        critical_crash_keywords = ["kernel panic", "purple screen", "spinning gear wheel for 6 hours", "boot loop"]
+        if any(kw in query_lower for kw in critical_crash_keywords):
+            return EscalationDecision(
+                action="ESCALATE",
+                reason_code="CRITICAL_SYSTEM_FAILURE",
+                details="Device is experiencing severe hardware/software system failure.",
+                intent_confidence=intent_confidence,
+                retrieval_similarity=retrieval_similarity,
+                is_sensitive_intent=True
+            )
+
+        # 4. Urgent / High-Risk keyword scan
         for kw in URGENT_KEYWORDS:
             if re.search(r"\b" + re.escape(kw) + r"\b", query_lower):
                 return EscalationDecision(
@@ -106,7 +144,7 @@ class EscalationPolicy:
                     risk_keyword_matched=kw
                 )
 
-        # 4. Intent classification confidence threshold
+        # 5. Intent classification confidence threshold
         if intent_confidence < self.tau_intent:
             return EscalationDecision(
                 action="ESCALATE",
@@ -117,12 +155,16 @@ class EscalationPolicy:
                 is_sensitive_intent=False
             )
 
-        # 5. Historical retrieval evidence similarity threshold
-        if retrieval_similarity < self.tau_retrieval:
+        # 6. Historical retrieval evidence similarity threshold
+        effective_tau_retrieval = self.tau_retrieval
+        if intent_confidence >= 0.30:
+            effective_tau_retrieval = min(self.tau_retrieval, 0.05)
+
+        if retrieval_similarity < effective_tau_retrieval:
             return EscalationDecision(
                 action="ESCALATE",
                 reason_code="INSUFFICIENT_HISTORICAL_EVIDENCE",
-                details=f"Nearest historical precedent similarity ({retrieval_similarity:.3f}) is below evidence threshold ({self.tau_retrieval:.2f}).",
+                details=f"Nearest historical precedent similarity ({retrieval_similarity:.3f}) is below evidence threshold ({effective_tau_retrieval:.2f}).",
                 intent_confidence=intent_confidence,
                 retrieval_similarity=retrieval_similarity,
                 is_sensitive_intent=False

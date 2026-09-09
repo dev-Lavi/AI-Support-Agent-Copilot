@@ -54,7 +54,14 @@ def generate_curated_brand_corpus(n_pairs: int = 1800, seed: int = 42) -> pd.Dat
                 "Optimized battery charging isn't working on my {device}.",
                 "Wireless charger is not working with my {device} case on.",
                 "My {device} battery life is terrible compared to my previous phone.",
-                "Charging port seems loose and cables keep falling out of my {device}."
+                "Charging port seems loose and cables keep falling out of my {device}.",
+                "my phone turns off at 50% randomly and restarts again",
+                "iphone 7 wont turn on at all just black screen",
+                "charging cable outer rubber is frayed and exposed wire showing",
+                "battery percentage number is missing from the status bar on ios 16",
+                "iphone got wet in pool and now says liquid detected in lightning connector",
+                "is fast charging bad for battery health over time?",
+                "Can I leave my iPhone charging overnight every night?"
             ],
             "brand": [
                 "We want your battery to perform at its best. Check your Battery Health under Settings > Battery: <URL> and let us know what you see! ^AB",
@@ -62,7 +69,11 @@ def generate_curated_brand_corpus(n_pairs: int = 1800, seed: int = 42) -> pd.Dat
                 "Battery capacity naturally decreases over time. If Maximum Capacity is under 80%, a battery replacement is recommended: <URL> ^EF",
                 "Let's get your device powering on. Try a force restart following the steps here: <URL>. Let us know if the Apple logo appears! ^GH",
                 "Unexpected shutdowns can occur if peak power is degraded. Take a look at your battery health settings here: <URL> ^IJ",
-                "After updates, background indexing can temporarily affect battery life for up to 48 hours: <URL> ^KL"
+                "After updates, background indexing can temporarily affect battery life for up to 48 hours: <URL> ^KL",
+                "You can re-enable Battery Percentage under Settings > Battery > Battery Percentage toggle: <URL> ^AB",
+                "Do not charge while wet. Allow port to dry completely for at least 5 hours: <URL> ^AB",
+                "Apple fast chargers use built-in management to protect battery longevity: <URL> ^AB",
+                "Yes, iOS includes safety circuits and Optimized Charging to protect your battery overnight: <URL> ^AB"
             ]
         },
         "app_software_issue": {
@@ -76,14 +87,31 @@ def generate_curated_brand_corpus(n_pairs: int = 1800, seed: int = 42) -> pd.Dat
                 "FaceTime audio cuts out after a few seconds on every call.",
                 "App Store says Unable to Download App whenever I try to install {app}.",
                 "My screen is completely frozen on a black screen with spinning wheel.",
-                "Siri does not respond to voice commands on my {device} anymore."
+                "Siri does not respond to voice commands on my {device} anymore.",
+                "Clock app alarm didn't go off this morning and made me late for work!",
+                "Books app lost all my PDF annotations after sync",
+                "calculator app gives wrong answers 2+2=5 lol fix your math",
+                "FaceID fails in landscape mode on iPhone 13",
+                "Podcasts app using 40GB of storage even though I have no downloaded episodes",
+                "Calendar app is sending me spam notifications every 5 minutes about winning an iPhone",
+                "Apple Music songs keep skipping randomly halfway through playback",
+                "Screen rotation is locked even though portrait lock icon is turned off in Control Center",
+                "Spotify pauses whenever I lock my iPhone screen",
+                "Files app won't download documents from Google Drive"
             ],
             "brand": [
                 "Let's get {app} working again. Try force quitting the app, checking for updates in App Store, and restarting: <URL> ^AB",
                 "To fix the camera display, try a force restart using this guide: <URL>. Does the flashlight return after rebooting? ^CD",
                 "Keyboard lag can often be resolved by resetting the keyboard dictionary in Settings > General > Transfer or Reset: <URL> ^EF",
                 "For Safari webpage reload issues, try clearing website data under Settings > Safari > Clear History and Website Data: <URL> ^GH",
-                "Let's look into your iCloud sync. Check if Notes is toggled on under Settings > [Your Name] > iCloud: <URL> ^IJ"
+                "Let's look into your iCloud sync. Check if Notes is toggled on under Settings > [Your Name] > iCloud: <URL> ^IJ",
+                "Check if Attention Aware Features lowered your volume under Settings > Face ID & Passcode: <URL> ^AB",
+                "Check if you have any stored calculations in memory or try clearing with AC! ^AB",
+                "Face ID in landscape is supported on iPhone 13 and later running iOS 16+. Update to iOS 16+: <URL> ^AB",
+                "Remove and reinstall the Podcasts app from App Store to clear phantom cache data: <URL> ^AB",
+                "This is an unwanted calendar subscription. Remove it via Settings > Calendar > Accounts: <URL> ^AB",
+                "Try toggling Lossless Audio under Settings > Music > Audio Quality or test on Wi-Fi: <URL> ^AB",
+                "Try a force restart to recalibrate motion sensors: <URL> ^AB"
             ]
         },
         "account_access_auth": {
@@ -97,7 +125,10 @@ def generate_curated_brand_corpus(n_pairs: int = 1800, seed: int = 42) -> pd.Dat
                 "Bought a refurbished {device} and it has an Activation Lock from previous owner.",
                 "How do I remove an old device from my trusted devices list?",
                 "Screen Time passcode forgotten on my child's iPad.",
-                "Need to set up two factor authentication on my new {device}."
+                "Need to set up two factor authentication on my new {device}.",
+                "Can Apple support unlock my phone for me over the phone?",
+                "Why does it say my account has been disabled in the App Store and iTunes?",
+                "Keep getting verification codes sent to my phone that I did not request!"
             ],
             "brand": [
                 "Regaining access to your account is important. You can start the Account Recovery process here: <URL> ^AB",
@@ -118,7 +149,15 @@ def generate_curated_brand_corpus(n_pairs: int = 1800, seed: int = 42) -> pd.Dat
                 "System data is taking up 70GB of storage after the latest update.",
                 "Automatic updates did not install overnight even though device was on charger.",
                 "WatchOS update paused until Apple Watch is on charger with 50% battery.",
-                "Software update button in settings is greyed out with spinning icon."
+                "Software update button in settings is greyed out with spinning icon.",
+                "Downloaded macOS Sonoma installer and it says 'Installation failed an error occurred'",
+                "My iPhone restarted 20 times during the update is that normal?",
+                "iPadOS 17 killed my Apple Pencil 2 it won't pair or show battery widget anymore",
+                "When will iOS 18 be released for iPhone 11?",
+                "iPhone storage says 130GB used of 64GB available lol",
+                "Can I update my Apple TV without a remote?",
+                "Update asks for passcode I never set up a 6 digit passcode only 4 digits",
+                "My battery health dropped 4% immediately after updating to 17.2 why did you do this??"
             ],
             "brand": [
                 "If the update is stuck, try deleting the update file in Settings > General > iPhone Storage, then redownload: <URL> ^AB",
@@ -139,14 +178,17 @@ def generate_curated_brand_corpus(n_pairs: int = 1800, seed: int = 42) -> pd.Dat
                 "Accidentally bought the wrong in-app purchase coins in a game.",
                 "Gift card says already redeemed but my balance did not increase.",
                 "Why was I charged $1 temporary authorization hold on my debit card?",
-                "How do I downgrade my iCloud storage plan from 2TB to 200GB?"
+                "How do I downgrade my iCloud storage plan from 2TB to 200GB?",
+                "How do I redeem an Apple Gift Card on iPhone?",
+                "How to view my purchase history on my Apple ID?"
             ],
             "brand": [
                 "You can view, manage, and cancel subscriptions directly in Settings > [Your Name] > Subscriptions: <URL> ^AB",
                 "To review charges and submit a refund request, visit our self-service portal: <URL> ^CD",
                 "Update or add a payment method under Settings > [Your Name] > Payment & Shipping: <URL> ^EF",
                 "You can inspect your purchase history and invoices by following the instructions here: <URL> ^GH",
-                "Temporary authorization holds verify account validity and drop off in a few business days: <URL> ^IJ"
+                "Temporary authorization holds verify account validity and drop off in a few business days: <URL> ^IJ",
+                "Open App Store > tap your profile icon > tap 'Redeem Gift Card or Code': <URL> ^AB"
             ]
         },
         "connectivity_network": {
@@ -181,14 +223,21 @@ def generate_curated_brand_corpus(n_pairs: int = 1800, seed: int = 42) -> pd.Dat
                 "Is cracked rear glass covered by Apple standard limited warranty?",
                 "Can Apple replace just the battery on my Apple Watch?",
                 "How do I transfer AppleCare+ coverage to someone who bought my device?",
-                "What documents should I bring to an Apple Store repair appointment?"
+                "What documents should I bring to an Apple Store repair appointment?",
+                "Store quoted me $600 for water damage repair on my iPhone 12 this is robbery!",
+                "How long does mail-in iPhone repair take on average?",
+                "Do you offer loaner phones while my iPhone is sent out for repair?"
             ],
             "brand": [
                 "You can easily book a Genius Bar appointment at your nearest Apple Store using this link: <URL> ^AB",
                 "Check out-of-warranty screen and hardware repair cost estimates for your model here: <URL> ^CD",
                 "You can verify your warranty and AppleCare+ coverage using your serial number here: <URL> ^EF",
                 "Walk-in service is subject to availability, so we recommend reserving a slot in advance: <URL> ^GH",
-                "Track the status of your repair at any time using your Repair ID and postal code: <URL> ^IJ"
+                "Track the status of your repair at any time using your Repair ID and postal code: <URL> ^IJ",
+                "Out-of-warranty fees cover full device replacement for liquid damage. DM us for options. ^AB",
+                "Mail-in repairs generally take 5 to 7 business days from the date we receive your device: <URL> ^AB",
+                "Loaner devices may be available at select Apple Stores during qualifying repairs: <URL> ^AB",
+                "Bring your device, a government ID, proof of purchase if available, and back up your device: <URL> ^AB"
             ]
         },
         "feedback_complaint": {
@@ -255,8 +304,12 @@ def generate_curated_brand_corpus(n_pairs: int = 1800, seed: int = 42) -> pd.Dat
             hrs = random.choice(["2", "3", "4", "5"])
             hlth = random.choice(["74", "78", "81", "84", "89"])
 
-            cust_tpl = random.choice(tpl["customer"])
-            brand_tpl = random.choice(tpl["brand"])
+            cust_idx = random.randrange(len(tpl["customer"]))
+            cust_tpl = tpl["customer"][cust_idx]
+            if cust_idx < len(tpl["brand"]):
+                brand_tpl = tpl["brand"][cust_idx]
+            else:
+                brand_tpl = random.choice(tpl["brand"])
 
             c_text = cust_tpl.format(device=dev, app=app, hours=hrs, health=hlth)
             b_text = brand_tpl.format(device=dev, app=app, hours=hrs, health=hlth)
