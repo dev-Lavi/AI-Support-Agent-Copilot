@@ -1,20 +1,28 @@
-"""Groq LLaMA-3.3-70B Pipeline for High-Accuracy Intent Classification, Grounded Reply Drafting, and Conservative Escalation.
+"""Google Gemini API Pipeline for High-Accuracy Intent Classification, Grounded Reply Drafting, and Conservative Escalation.
 
-Zero-PyTorch cloud inference with sub-200ms latency and minimal memory (<5MB RAM).
+Zero-PyTorch cloud inference with sub-500ms latency and minimal memory (<5MB RAM).
+Uses Google AI Studio free-tier Gemini API (gemini-2.0-flash-lite).
 """
 
 import os
 import json
-import re
 from typing import Dict, List, Optional, Tuple
 import httpx
 
 from src.intents.taxonomy import INTENTS, SENSITIVE_INTENTS
 
 
-GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-DEFAULT_MODEL = "llama-3.3-70b-versatile"
-FAST_MODEL = "llama-3.1-8b-instant"
+GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
+DEFAULT_MODEL = "gemini-2.0-flash-lite"
+FAST_MODEL = "gemini-2.0-flash-lite"
+
+# Ordered preference — most capable first, all free-tier available
+CANDIDATE_MODELS = [
+    "gemini-2.0-flash",
+    "gemini-2.0-flash-lite",
+    "gemini-1.5-flash",
+    "gemini-1.5-flash-8b",
+]
 
 
 SYSTEM_PROMPT = """You are the AI Customer Support Copilot for @AppleSupport on Twitter.
@@ -52,7 +60,7 @@ You must accomplish 3 strict tasks:
    - Sign off with "^AB".
    - Never promise a free hardware replacement or manual refund without authorized inspection.
 
-Return ONLY a JSON object with this exact schema:
+Return ONLY a valid JSON object with this exact schema (no markdown, no code fences):
 {
   "predicted_intent": "<one of the 9 intents>",
   "intent_confidence": <float between 0.50 and 0.99>,
@@ -66,24 +74,63 @@ Return ONLY a JSON object with this exact schema:
 
 
 class GroqSupportAgent:
-    """High-accuracy Groq LLaMA client for support triage."""
+    """Google Gemini-backed support triage agent.
+
+    Kept as 'GroqSupportAgent' for backward compatibility with the pipeline.
+    Reads GEMINI_API_KEY (preferred) or GROQ_API_KEY from environment for legacy compat.
+    """
 
     def __init__(self, api_key: Optional[str] = None, model: str = DEFAULT_MODEL):
-        self.api_key = api_key or os.environ.get("GROQ_API_KEY", "")
+        # Accept GEMINI_API_KEY preferentially; fall back to GROQ_API_KEY for easy migration
+        self.api_key = (
+            api_key
+            or os.environ.get("GEMINI_API_KEY", "")
+            or os.environ.get("GROQ_API_KEY", "")
+        )
         self.model = model
 
     @property
     def is_configured(self) -> bool:
         return bool(self.api_key and len(self.api_key.strip()) > 10)
 
+    def _call_gemini(self, client: httpx.Client, model_id: str, user_content: str) -> Optional[str]:
+        """Calls the Gemini generateContent REST endpoint. Returns raw text or None on failure."""
+        url = f"{GEMINI_API_BASE}/{model_id}:generateContent?key={self.api_key.strip()}"
+        payload = {
+            "system_instruction": {"parts": [{"text": SYSTEM_PROMPT}]},
+            "contents": [{"role": "user", "parts": [{"text": user_content}]}],
+            "generationConfig": {
+                "temperature": 0.1,
+                "responseMimeType": "application/json",
+            },
+        }
+        try:
+            resp = client.post(url, json=payload, timeout=20.0)
+            if resp.status_code == 200:
+                data = resp.json()
+                content = (
+                    data.get("candidates", [{}])[0]
+                    .get("content", {})
+                    .get("parts", [{}])[0]
+                    .get("text", "")
+                    or ""
+                )
+                return content.strip() if content.strip() else None
+            else:
+                raise RuntimeError(
+                    f"Gemini API returned status {resp.status_code} for model '{model_id}': {resp.text}"
+                )
+        except httpx.TimeoutException:
+            raise RuntimeError(f"Gemini API timeout for model '{model_id}'")
+
     def triage(
         self,
         query: str,
         retrieved_evidence: Optional[List[Tuple[Dict, float]]] = None
     ) -> Dict:
-        """Invokes Groq LLaMA to classify intent, evaluate escalation, and draft a grounded reply."""
+        """Invokes Gemini to classify intent, evaluate escalation, and draft a grounded reply."""
         if not self.is_configured:
-            raise ValueError("GROQ_API_KEY is not configured.")
+            raise ValueError("GEMINI_API_KEY is not configured.")
 
         # Build context from retrieved historical resolutions
         context_str = ""
@@ -98,63 +145,31 @@ class GroqSupportAgent:
 
         user_content = f"Incoming Customer Query:\n\"{query}\"{context_str}\n\nPlease triage and return JSON."
 
-        headers = {
-            "Authorization": f"Bearer {self.api_key.strip()}",
-            "Content-Type": "application/json"
-        }
-
-        payload = {
-            "model": self.model,
-            "messages": [
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": user_content}
-            ],
-            "temperature": 0.1,
-            "response_format": {"type": "json_object"}
-        }
-
-        # Safe hardcoded fallback — only known-active models (no decommissioned ones)
-        candidate_models = [self.model, "llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
-        # Query active models dynamically and filter against our preferred list
-        try:
-            with httpx.Client(timeout=4.0) as client:
-                m_resp = client.get("https://api.groq.com/openai/v1/models", headers={"Authorization": f"Bearer {self.api_key.strip()}"})
-                if m_resp.status_code == 200:
-                    avail_ids = {m.get("id") for m in m_resp.json().get("data", []) if m.get("id")}
-                    # Ordered preference list — no decommissioned models
-                    pref = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "llama3-70b-8192"]
-                    active = [m for m in pref if m in avail_ids]
-                    if active:
-                        candidate_models = active
-        except Exception:
-            pass
-
-        # Remove duplicates while preserving order
-        candidate_models = list(dict.fromkeys(candidate_models))
-
         last_error = None
         raw_content = None
 
-        with httpx.Client(timeout=15.0) as client:
-            for model_name in candidate_models:
-                payload["model"] = model_name
+        with httpx.Client(timeout=25.0) as client:
+            for model_id in CANDIDATE_MODELS:
                 try:
-                    resp = client.post(GROQ_API_URL, headers=headers, json=payload)
-                    if resp.status_code == 200:
-                        data = resp.json()
-                        content = data["choices"][0]["message"].get("content", "") or ""
-                        if content.strip():
-                            raw_content = content
-                            break
-                        else:
-                            last_error = f"Model '{model_name}' returned empty content (empty output error), trying next."
+                    raw_content = self._call_gemini(client, model_id, user_content)
+                    if raw_content:
+                        break
                     else:
-                        last_error = f"Groq API returned status {resp.status_code} for model '{model_name}': {resp.text}"
-                except Exception as ex:
-                    last_error = f"Groq HTTP error for model '{model_name}': {ex}"
+                        last_error = f"Model '{model_id}' returned empty content, trying next."
+                except RuntimeError as e:
+                    last_error = str(e)
+                    print(f"[pipeline] Gemini warning: {last_error}")
 
         if not raw_content:
-            raise RuntimeError(last_error or "All Groq model requests failed.")
+            raise RuntimeError(last_error or "All Gemini model requests failed.")
+
+        # Strip any accidental markdown code fences
+        raw_content = raw_content.strip()
+        if raw_content.startswith("```"):
+            raw_content = raw_content.split("```")[1]
+            if raw_content.startswith("json"):
+                raw_content = raw_content[4:]
+        raw_content = raw_content.strip()
 
         result = json.loads(raw_content)
 
@@ -190,7 +205,7 @@ class GroqSupportAgent:
             "intent_distribution": dist,
             "decision": decision,
             "reason_code": result.get("reason_code", "HIGH_CONF_GROUNDED"),
-            "reason_details": result.get("reason_details", "Triage performed via Groq LLaMA-3.3-70B"),
+            "reason_details": result.get("reason_details", "Triage performed via Google Gemini"),
             "draft_reply": result.get("draft_reply", ""),
             "groundedness_score": float(result.get("groundedness_score", 4.5))
         }

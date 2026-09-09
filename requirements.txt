@@ -6,7 +6,7 @@ scipy>=1.12.0
 # Machine Learning & NLP (Lightweight, Zero-PyTorch for cloud deployments)
 scikit-learn>=1.4.0
 
-# HTTP & Cloud LLM API Client (Groq LLaMA-3.3-70B)
+# HTTP & Cloud LLM API Client (Google Gemini free-tier)
 httpx>=0.27.0
 requests>=2.31.0
 
