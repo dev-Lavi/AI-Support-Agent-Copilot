@@ -71,8 +71,8 @@ def favicon():
 def health_check():
     """Health check and API index."""
     pipeline = get_pipeline()
-    is_groq = bool(pipeline.groq_agent and pipeline.groq_agent.is_configured)
-    engine = "Groq LLaMA-3.3-70B (Cloud RAG)" if is_groq else "Scikit-Learn TF-IDF (Lightweight Fallback, <50MB RAM)"
+    is_cloud = bool(pipeline.groq_agent and pipeline.groq_agent.is_configured)
+    engine = "Google Gemini 2.0-Flash (Cloud RAG)" if is_cloud else "Scikit-Learn TF-IDF (Lightweight Fallback, <50MB RAM)"
     return {
         "status": "online",
         "brand": "@AppleSupport",
