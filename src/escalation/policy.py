@@ -8,9 +8,9 @@ from src.intents.taxonomy import SENSITIVE_INTENTS
 
 # High-risk keywords indicating legal action, physical safety hazard, or financial fraud
 URGENT_KEYWORDS = [
-    "lawsuit", "lawyer", "attorney", "sue", "scam", "fraud", "stolen",
+    "lawsuit", "lawyer", "attorney", "sue", "scam", "fraud", "stolen", "stole",
     "swelling", "melted", "burned", "smoke", "sparks", "fire",
-    "unauthorized charge", "hacked", "police", "court"
+    "unauthorized", "unauthorized charge", "refund", "dispute", "hacked", "police", "court"
 ]
 
 
@@ -42,8 +42,8 @@ class EscalationPolicy:
 
     def __init__(
         self,
-        tau_intent: float = 0.70,
-        tau_retrieval: float = 0.65,
+        tau_intent: float = 0.28,
+        tau_retrieval: float = 0.20,
         sensitive_intents: Optional[List[str]] = None
     ):
         self.tau_intent = tau_intent

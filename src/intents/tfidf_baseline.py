@@ -16,7 +16,7 @@ class TfidfBaselineClassifier:
     with calibrated Logistic Regression.
     """
 
-    def __init__(self, max_features: int = 5000, ngram_range: Tuple[int, int] = (1, 2)):
+    def __init__(self, max_features: int = 8000, ngram_range: Tuple[int, int] = (1, 2)):
         self.vectorizer = TfidfVectorizer(
             ngram_range=ngram_range,
             max_features=max_features,
@@ -24,7 +24,8 @@ class TfidfBaselineClassifier:
             strip_accents="unicode",
         )
         self.clf = LogisticRegression(
-            C=1.0,
+            C=2.0,
+            class_weight="balanced",
             max_iter=1000,
             solver="lbfgs",
             random_state=42
