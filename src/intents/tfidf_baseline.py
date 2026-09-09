@@ -2,7 +2,7 @@
 
 import pickle
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
@@ -58,6 +58,15 @@ class TfidfBaselineClassifier:
         for local_col, class_idx in enumerate(self.clf.classes_):
             full_probs[:, class_idx] = raw_probs[:, local_col]
         return full_probs
+
+    def predict_single(self, text: str) -> Tuple[str, float, Dict[str, float]]:
+        """Convenience method for single-query inference."""
+        probs = self.predict_proba([text])[0]
+        pred_idx = int(np.argmax(probs))
+        confidence = float(probs[pred_idx])
+        pred_intent = ID2INTENT[pred_idx]
+        intent_distribution = {INTENTS[i]: float(probs[i]) for i in range(len(INTENTS))}
+        return pred_intent, confidence, intent_distribution
 
     def save(self, filepath: str):
         """Saves model to disk."""

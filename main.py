@@ -12,21 +12,6 @@ import json
 from pathlib import Path
 from typing import Dict, List, Optional
 
-# Low-memory instance optimizations (e.g. Render free tier 512MB RAM cap)
-os.environ["OMP_NUM_THREADS"] = "1"
-os.environ["MKL_NUM_THREADS"] = "1"
-os.environ["OPENBLAS_NUM_THREADS"] = "1"
-os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
-os.environ["NUMEXPR_NUM_THREADS"] = "1"
-os.environ["MALLOC_ARENA_MAX"] = "2"
-
-try:
-    import torch
-    torch.set_num_threads(1)
-    torch.set_num_interop_threads(1)
-except ImportError:
-    pass
-
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
@@ -60,15 +45,11 @@ _pipeline: Optional[SupportAgentPipeline] = None
 
 
 def get_pipeline() -> SupportAgentPipeline:
-    """Lazy loads or initializes the trained pipeline."""
+    """Lazy loads or initializes the lightweight pipeline (<50MB RAM)."""
     global _pipeline
     if _pipeline is None:
         models_dir = PROJECT_ROOT / "results/models"
-        if not (models_dir / "intent_classifier.pkl").exists():
-            print("[api] Pretrained model not found. Initializing on default data...")
-            from scripts.train_models import main as run_train
-            run_train()
-        _pipeline = SupportAgentPipeline.load(str(models_dir))
+        _pipeline = SupportAgentPipeline.load(str(models_dir), prefer_lightweight=True)
     return _pipeline
 
 
@@ -89,9 +70,13 @@ def favicon():
 @app.get("/api")
 def health_check():
     """Health check and API index."""
+    pipeline = get_pipeline()
+    is_groq = bool(pipeline.groq_agent and pipeline.groq_agent.is_configured)
+    engine = "Groq LLaMA-3.3-70B (Cloud RAG)" if is_groq else "Scikit-Learn TF-IDF (Lightweight Fallback, <50MB RAM)"
     return {
         "status": "online",
         "brand": "@AppleSupport",
+        "engine": engine,
         "assignment": "Hiver SDE Intern Take-Home",
         "docs_url": "/docs",
         "api_endpoints": {
