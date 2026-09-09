@@ -113,20 +113,31 @@ class GroqSupportAgent:
             "response_format": {"type": "json_object"}
         }
 
+        candidate_models = [self.model, "llama-3.3-70b-versatile", "llama-3.1-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768"]
+        # Remove duplicates while preserving order
+        candidate_models = list(dict.fromkeys(candidate_models))
+
+        last_error = None
+        raw_content = None
+
         with httpx.Client(timeout=15.0) as client:
-            resp = client.post(GROQ_API_URL, headers=headers, json=payload)
-            if resp.status_code != 200:
-                # If 70b hits rate limits, try fast 8b model
-                if self.model != FAST_MODEL and (resp.status_code == 429 or resp.status_code >= 500):
-                    payload["model"] = FAST_MODEL
+            for model_name in candidate_models:
+                payload["model"] = model_name
+                try:
                     resp = client.post(GROQ_API_URL, headers=headers, json=payload)
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        raw_content = data["choices"][0]["message"]["content"]
+                        break
+                    else:
+                        last_error = f"Groq API returned status {resp.status_code} for model '{model_name}': {resp.text}"
+                except Exception as ex:
+                    last_error = f"Groq HTTP error for model '{model_name}': {ex}"
 
-            if resp.status_code != 200:
-                raise RuntimeError(f"Groq API returned status {resp.status_code}: {resp.text}")
+        if not raw_content:
+            raise RuntimeError(last_error or "All Groq model requests failed.")
 
-            data = resp.json()
-            raw_content = data["choices"][0]["message"]["content"]
-            result = json.loads(raw_content)
+        result = json.loads(raw_content)
 
         # Validate fields and sanitize
         pred_intent = result.get("predicted_intent", "other_unknown")
