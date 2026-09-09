@@ -153,8 +153,10 @@ class SupportAgentPipeline:
 
     @classmethod
     def load(cls, model_dir: str = "results/models", device: str = "cpu") -> "SupportAgentPipeline":
-        """Loads fitted pipeline from disk."""
+        """Loads fitted pipeline from disk with shared encoder to minimize RAM usage."""
         inp = Path(model_dir)
         clf = EmbeddingIntentClassifier.load(str(inp / "intent_classifier.pkl"), device=device)
         ret = ResolutionRetrievalIndex.load(str(inp / "retrieval_index"), device=device)
+        # Share encoder instance to eliminate duplicate 200MB memory allocation
+        ret._encoder = clf.encoder
         return cls(intent_classifier=clf, retrieval_index=ret)

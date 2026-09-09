@@ -6,9 +6,27 @@ Exposes REST API endpoints for Next.js / React frontend integration and Hugging 
 - GET /api/presets: Returns curated test examples (easy FAQ, ambiguous, sensitive escalation)
 """
 
+import os
+import gc
 import json
 from pathlib import Path
 from typing import Dict, List, Optional
+
+# Low-memory instance optimizations (e.g. Render free tier 512MB RAM cap)
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
+os.environ["MALLOC_ARENA_MAX"] = "2"
+
+try:
+    import torch
+    torch.set_num_threads(1)
+    torch.set_num_interop_threads(1)
+except ImportError:
+    pass
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
@@ -104,7 +122,9 @@ def triage_query(req: QueryRequest):
 
     pipeline = get_pipeline()
     res = pipeline.process(req.query)
-    return res.to_dict()
+    output = res.to_dict()
+    gc.collect()
+    return output
 
 
 @app.get("/api/metrics")
