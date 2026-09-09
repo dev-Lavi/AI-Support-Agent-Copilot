@@ -1,0 +1,63 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Data files (Large raw files)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*.parquet
+data/processed/*.csv
+!data/processed/.gitkeep
+!data/processed/sample_brand_data.json
+data/splits/*.parquet
+data/splits/*.csv
+!data/splits/.gitkeep
+data/golden/*.csv
+!data/golden/.gitkeep
+!data/golden/golden_set.json
+
+# Environment & Secrets
+.env
+.env.local
+
+# IDE & OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Test & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Results & Artifacts
+results/plots/*.png
+results/plots/*.pdf
+results/metrics/*.json
+!results/metrics/.gitkeep
+results/examples/*.json
+!results/examples/.gitkeep
