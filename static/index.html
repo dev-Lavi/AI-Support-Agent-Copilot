@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,7 +15,11 @@
     <!-- Header -->
     <header class="navbar">
       <div class="brand-group">
-        <div class="logo-icon"></div>
+        <div class="logo-icon" title="@AppleSupport Agent">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.62-.75 1.04-1.8 0.92-2.85-.9.04-1.99.6-2.61 1.34-.55.63-1.03 1.68-.9 2.7 1 .08 2.04-.5 2.59-1.19z"/>
+          </svg>
+        </div>
         <div>
           <h1 class="brand-title">AI Support Agent Copilot</h1>
           <p class="brand-subtitle">Grounded in Historical <strong>@AppleSupport</strong> Twitter Data • Zero-Leakage Architecture</p>
@@ -25,6 +29,10 @@
         <span class="status-badge live"><span class="dot"></span> Agent Online</span>
         <span class="tech-badge">all-MiniLM-L6-v2</span>
         <span class="tech-badge">FAISS In-Memory</span>
+        <button id="theme-toggle-btn" class="theme-toggle-btn" onclick="toggleTheme()" title="Switch Light/Dark Theme">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          <span>Dark</span>
+        </button>
         <a href="/docs" target="_blank" class="docs-link">API Docs ↗</a>
       </div>
     </header>
@@ -32,13 +40,16 @@
     <!-- Navigation Tabs -->
     <nav class="tab-nav">
       <button class="tab-btn active" id="tab-playground-btn" onclick="switchTab('playground')">
-        <span class="tab-icon">⚡</span> Live Triage Playground
+        <svg class="tab-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span>Live Triage Playground</span>
       </button>
       <button class="tab-btn" id="tab-evaluation-btn" onclick="switchTab('evaluation')">
-        <span class="tab-icon">📊</span> Trust & Evaluation Dashboard
+        <svg class="tab-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+        <span>Trust & Evaluation Dashboard</span>
       </button>
       <button class="tab-btn" id="tab-failures-btn" onclick="switchTab('failures')">
-        <span class="tab-icon">⚠️</span> Failure Analysis & Caveats
+        <svg class="tab-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>Failure Analysis & Caveats</span>
       </button>
     </nav>
 
@@ -72,7 +83,14 @@
         <!-- Output Column -->
         <div class="card output-card" id="output-card">
           <div class="empty-state" id="empty-state">
-            <div class="empty-icon">🔍</div>
+            <div class="empty-icon">
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <line x1="11" y1="8" x2="11" y2="14"/>
+                <line x1="8" y1="11" x2="14" y2="11"/>
+              </svg>
+            </div>
             <h3>Ready to Triage</h3>
             <p>Click a preset case above or type a customer tweet, then click <strong>Run Agent Triage</strong> to evaluate intent, retrieval, escalation, and grounded reply drafting.</p>
           </div>
@@ -119,19 +137,28 @@
               <div class="tile-header">
                 <span class="tile-title">4. Grounded Reply Draft (Safe for Auto-Handle)</span>
                 <div class="draft-meta">
-                  <span class="latency-badge" id="latency-badge">⏱️ 24ms CPU</span>
-                  <span class="grounded-rating" id="grounded-rating">⭐ 5.0 / 5.0 Grounded</span>
-                  <button id="copy-reply-btn" class="btn-secondary" onclick="copyReply()">Copy Reply</button>
+                  <span class="latency-badge" id="latency-badge">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>24ms CPU</span>
+                  </span>
+                  <span class="grounded-rating" id="grounded-rating">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <span>5.0 / 5.0 Grounded</span>
+                  </span>
+                  <button id="copy-reply-btn" class="btn-secondary" onclick="copyReply()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                    <span>Copy Reply</span>
+                  </button>
                 </div>
               </div>
               <div class="reply-bubble" id="reply-bubble">
                 "..."
               </div>
               <div class="guardrail-pills">
-                <span class="guard-pill pass">✓ Strict Historical Grounding</span>
-                <span class="guard-pill pass">✓ Twitter Char Length Compliant</span>
-                <span class="guard-pill pass">✓ Zero Hallucinated URLs</span>
-                <span class="guard-pill pass">✓ Official ^AB Sign-Off</span>
+                <span class="guard-pill pass"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Strict Historical Grounding</span>
+                <span class="guard-pill pass"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Twitter Char Length Compliant</span>
+                <span class="guard-pill pass"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Zero Hallucinated URLs</span>
+                <span class="guard-pill pass"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Official ^AB Sign-Off</span>
               </div>
             </div>
           </div>
@@ -256,7 +283,13 @@
 
       <!-- Mandatory Section Alert -->
       <div class="alert-box mandatory">
-        <div class="alert-icon">⚠️</div>
+        <div class="alert-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
         <div>
           <h3>Mandatory Audit: "What is Misleading About My Headline Number?"</h3>
           <p>

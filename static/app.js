@@ -7,10 +7,40 @@ let presetsData = [];
 
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", () => {
+  initTheme();
   loadPresets();
   loadMetrics();
   setupTextareaCounter();
 });
+
+// Theme Management (Light / Dark)
+function initTheme() {
+  const saved = localStorage.getItem("theme");
+  if (saved === "light") {
+    document.documentElement.classList.remove("dark");
+    updateThemeBtn(false);
+  } else {
+    document.documentElement.classList.add("dark");
+    updateThemeBtn(true);
+  }
+}
+
+function toggleTheme() {
+  const isDark = document.documentElement.classList.toggle("dark");
+  localStorage.setItem("theme", isDark ? "dark" : "light");
+  updateThemeBtn(isDark);
+}
+
+function updateThemeBtn(isDark) {
+  const btn = document.getElementById("theme-toggle-btn");
+  if (btn) {
+    if (isDark) {
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg><span>Dark</span>`;
+    } else {
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg><span>Light</span>`;
+    }
+  }
+}
 
 // Tab switching
 function switchTab(tabId) {
@@ -35,7 +65,7 @@ function setupTextareaCounter() {
     if (len > 280) {
       counter.style.color = "#ef4444";
     } else {
-      counter.style.color = "var(--text-muted)";
+      counter.style.color = "var(--muted-foreground)";
     }
   });
 }
@@ -51,7 +81,7 @@ async function loadPresets() {
     presetsData.forEach((preset, index) => {
       const chip = document.createElement("button");
       chip.className = "preset-chip";
-      chip.textContent = `${getEmojiForTag(preset.tag)} ${preset.category}`;
+      chip.innerHTML = `${getIconForTag(preset.tag)}<span>${preset.category}</span>`;
       chip.onclick = () => selectPreset(index);
       container.appendChild(chip);
     });
@@ -60,14 +90,20 @@ async function loadPresets() {
   }
 }
 
-function getEmojiForTag(tag) {
+function getIconForTag(tag) {
   switch (tag) {
-    case "easy": return "🟢";
-    case "high_risk": return "🔴";
-    case "sensitive": return "🟡";
-    case "safety_hazard": return "🟣";
-    case "complaint": return "🟠";
-    default: return "🔹";
+    case "easy":
+      return `<svg class="chip-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+    case "high_risk":
+      return `<svg class="chip-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ff3434" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+    case "sensitive":
+      return `<svg class="chip-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
+    case "safety_hazard":
+      return `<svg class="chip-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`;
+    case "complaint":
+      return `<svg class="chip-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="15" x2="12.01" y2="15"/></svg>`;
+    default:
+      return `<svg class="chip-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
   }
 }
 
@@ -126,7 +162,7 @@ function renderTriageResults(data, latencyMs = 28) {
   // Update Latency Badge
   const latencyBadge = document.getElementById("latency-badge");
   if (latencyBadge) {
-    latencyBadge.textContent = `⏱️ ${latencyMs}ms CPU`;
+    latencyBadge.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>${latencyMs}ms CPU</span>`;
   }
 
   // 1. Intent Tile
@@ -170,7 +206,7 @@ function renderTriageResults(data, latencyMs = 28) {
   const groundedRating = document.getElementById("grounded-rating");
 
   draftBubble.textContent = `"${data.draft_reply}"`;
-  groundedRating.textContent = `⭐ ${data.groundedness_score.toFixed(1)} / 5.0 Grounded`;
+  groundedRating.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span>${data.groundedness_score.toFixed(1)} / 5.0 Grounded</span>`;
 }
 
 // Copy Reply to Clipboard with smooth animation
@@ -182,11 +218,11 @@ function copyReply() {
 
   navigator.clipboard.writeText(text).then(() => {
     if (btn) {
-      const origText = btn.textContent;
-      btn.textContent = "✓ Copied!";
+      const origHTML = btn.innerHTML;
+      btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Copied!</span>`;
       btn.classList.add("copied");
       setTimeout(() => {
-        btn.textContent = origText;
+        btn.innerHTML = origHTML;
         btn.classList.remove("copied");
       }, 2000);
     }
