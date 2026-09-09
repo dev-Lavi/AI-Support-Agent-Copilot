@@ -165,8 +165,8 @@ class EscalationPolicy:
         Returns:
             (best_tau_intent, best_tau_retrieval, best_fahr, best_coverage)
         """
-        candidate_tau_intent = [0.55, 0.60, 0.65, 0.70, 0.75, 0.80]
-        candidate_tau_retrieval = [0.50, 0.55, 0.60, 0.65, 0.70]
+        candidate_tau_intent = [0.25, 0.28, 0.35, 0.45, 0.55, 0.60, 0.65]
+        candidate_tau_retrieval = [0.15, 0.20, 0.25, 0.35, 0.45, 0.55, 0.60]
 
         best_cost = float("inf")
         best_params = (0.70, 0.65, 0.0, 0.0)

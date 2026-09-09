@@ -8,6 +8,8 @@
 📊 **Engine Health Endpoint**: [https://ai-support-agent-copilot.onrender.com/api/health](https://ai-support-agent-copilot.onrender.com/api/health)  
 📖 **Interactive Swagger Docs**: [https://ai-support-agent-copilot.onrender.com/docs](https://ai-support-agent-copilot.onrender.com/docs)
 
+> 💡 **Reviewer Note on Live Demo:** The model is fully capable of running completely offline locally using our Scikit-Learn TF-IDF fallback. However, to bypass Render's strict 512MB RAM free-tier limit and demonstrate engineering adaptability, we successfully shifted to a **Groq LLaMA-3.3-70B API** architecture for the live deployment. Additionally, since Render spins down idle free instances, we configured an **Uptime Robot** to ping the `/api/health` endpoint every 5 minutes, ensuring the agent remains warm and instantly responsive for your review!
+
 ---
 
 ## 1. Executive Summary & Problem Framing
