@@ -236,7 +236,7 @@
             <span class="tag-pill">9 Intent Categories</span>
           </div>
           <div class="img-container">
-            <img src="/results/plots/confusion_matrix.png" alt="Normalized Intent Confusion Matrix" class="confusion-img" onerror="this.src='https://via.placeholder.com/600x450?text=Confusion+Matrix+Generated'">
+            <img src="/api/confusion-matrix" alt="Normalized Intent Confusion Matrix" class="confusion-img" onerror="this.onerror=null;this.src='';this.alt='Confusion matrix not available — run scripts/evaluate.py to generate.';this.style.display='none';this.parentNode.insertAdjacentHTML('beforeend','<div style=&quot;display:flex;align-items:center;justify-content:center;height:200px;color:#888;font-size:14px;text-align:center;padding:20px&quot;>📊 Confusion matrix not generated yet.<br>Run <code>scripts/evaluate.py</code> to create it.</div>')">
           </div>
         </div>
 
@@ -248,15 +248,15 @@
           <div class="calibration-content" id="calibration-content">
             <div class="cal-stat">
               <span class="cal-name">Spearman Rank Correlation (ρ):</span>
-              <span class="cal-val text-gold">0.8755</span>
+              <span class="cal-val text-gold">0.8282</span>
             </div>
             <div class="cal-stat">
               <span class="cal-name">Pearson Linear Correlation (r):</span>
-              <span class="cal-val text-blue">0.9764</span>
+              <span class="cal-val text-blue">0.9788</span>
             </div>
             <div class="cal-stat">
               <span class="cal-name">Cohen's Quadratic Weighted Kappa (κ):</span>
-              <span class="cal-val text-cyan">0.7241</span>
+              <span class="cal-val text-cyan">0.5940</span>
             </div>
             <div class="cal-stat">
               <span class="cal-name">Systematic Judge Bias (Mean Error):</span>
@@ -267,7 +267,7 @@
               <span class="status-pill pass">PASSED (ρ ≥ 0.60 & κ ≥ 0.50)</span>
             </div>
             <p class="cal-expl mt-4">
-              The automated judge evaluates 5 standardized dimensions: Groundedness, Relevance, Actionability, Policy Safety, and Brand Tone. Achieving a rank correlation of <strong>0.8755</strong> confirms the judge faithfully reproduces human grading criteria.
+              The automated judge evaluates 5 standardized dimensions: Groundedness, Relevance, Actionability, Policy Safety, and Brand Tone. Achieving a rank correlation of <strong>0.8282</strong> confirms the judge faithfully reproduces human grading criteria.
             </p>
           </div>
         </div>

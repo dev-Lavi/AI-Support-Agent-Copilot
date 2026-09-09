@@ -142,6 +142,15 @@ def get_metrics():
     }
 
 
+@app.get("/api/confusion-matrix")
+def get_confusion_matrix():
+    """Serves the normalized confusion matrix PNG image."""
+    img_path = PROJECT_ROOT / "results" / "plots" / "confusion_matrix.png"
+    if not img_path.exists():
+        raise HTTPException(status_code=404, detail="Confusion matrix image not found. Run scripts/evaluate.py first.")
+    return FileResponse(str(img_path), media_type="image/png")
+
+
 @app.get("/api/presets")
 def get_presets():
     """Returns representative test cases from the Golden Set across all 9 intents for UI testing."""
