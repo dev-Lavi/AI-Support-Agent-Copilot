@@ -13,15 +13,17 @@ from src.intents.taxonomy import INTENTS, SENSITIVE_INTENTS
 
 
 GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
-DEFAULT_MODEL = "gemini-2.0-flash-lite"
-FAST_MODEL = "gemini-2.0-flash-lite"
+DEFAULT_MODEL = "gemini-3.6-flash"
+FAST_MODEL = "gemini-3.5-flash-lite"
 
 # Ordered preference — most capable first, all free-tier available
+# Updated per Gemini API 404 deprecation notices (Sep 2026)
 CANDIDATE_MODELS = [
-    "gemini-2.0-flash",
-    "gemini-2.0-flash-lite",
-    "gemini-1.5-flash",
-    "gemini-1.5-flash-8b",
+    "gemini-3.6-flash",        # replaces gemini-2.0-flash
+    "gemini-3.5-flash-lite",   # replaces gemini-2.0-flash-lite
+    "gemini-3.5-flash",        # general fallback
+    "gemini-2.5-flash",        # older stable fallback
+    "gemini-2.5-flash-lite",   # lightest fallback
 ]
 
 
@@ -145,11 +147,31 @@ class GroqSupportAgent:
 
         user_content = f"Incoming Customer Query:\n\"{query}\"{context_str}\n\nPlease triage and return JSON."
 
+        # Dynamic model discovery: filter CANDIDATE_MODELS to only available ones
+        active_candidates = list(CANDIDATE_MODELS)
+        try:
+            with httpx.Client(timeout=5.0) as probe:
+                resp = probe.get(
+                    f"{GEMINI_API_BASE}?key={self.api_key.strip()}",
+                    timeout=5.0
+                )
+                if resp.status_code == 200:
+                    available = {
+                        m.get("name", "").replace("models/", "")
+                        for m in resp.json().get("models", [])
+                        if "generateContent" in m.get("supportedGenerationMethods", [])
+                    }
+                    filtered = [m for m in CANDIDATE_MODELS if m in available]
+                    if filtered:
+                        active_candidates = filtered
+        except Exception:
+            pass  # Proceed with hardcoded list
+
         last_error = None
         raw_content = None
 
         with httpx.Client(timeout=25.0) as client:
-            for model_id in CANDIDATE_MODELS:
+            for model_id in active_candidates:
                 try:
                     raw_content = self._call_gemini(client, model_id, user_content)
                     if raw_content:
