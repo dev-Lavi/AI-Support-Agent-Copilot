@@ -113,14 +113,16 @@ class GroqSupportAgent:
             "response_format": {"type": "json_object"}
         }
 
-        candidate_models = [self.model, "llama-3.3-70b-versatile", "llama-3.1-8b-instant", "qwen-2.5-32b"]
-        # Query active models dynamically if possible
+        # Safe hardcoded fallback — only known-active models (no decommissioned ones)
+        candidate_models = [self.model, "llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+        # Query active models dynamically and filter against our preferred list
         try:
             with httpx.Client(timeout=4.0) as client:
                 m_resp = client.get("https://api.groq.com/openai/v1/models", headers={"Authorization": f"Bearer {self.api_key.strip()}"})
                 if m_resp.status_code == 200:
-                    avail_ids = [m.get("id") for m in m_resp.json().get("data", []) if m.get("id")]
-                    pref = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "qwen-2.5-32b"]
+                    avail_ids = {m.get("id") for m in m_resp.json().get("data", []) if m.get("id")}
+                    # Ordered preference list — no decommissioned models
+                    pref = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "llama3-70b-8192"]
                     active = [m for m in pref if m in avail_ids]
                     if active:
                         candidate_models = active
@@ -140,8 +142,12 @@ class GroqSupportAgent:
                     resp = client.post(GROQ_API_URL, headers=headers, json=payload)
                     if resp.status_code == 200:
                         data = resp.json()
-                        raw_content = data["choices"][0]["message"]["content"]
-                        break
+                        content = data["choices"][0]["message"].get("content", "") or ""
+                        if content.strip():
+                            raw_content = content
+                            break
+                        else:
+                            last_error = f"Model '{model_name}' returned empty content (empty output error), trying next."
                     else:
                         last_error = f"Groq API returned status {resp.status_code} for model '{model_name}': {resp.text}"
                 except Exception as ex:
